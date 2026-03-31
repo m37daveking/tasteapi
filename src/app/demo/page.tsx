@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { tastemakers } from "@/lib/tastemakers";
 
 interface TastemakerResponse {
@@ -12,100 +12,41 @@ interface TastemakerResponse {
 
 type Category = "culture" | "climate";
 
-const TextureCanvas = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+function renderMarkdown(text: string) {
+  return text.split("\n").map((line, i) => {
+    const parts: (string | React.ReactElement)[] = [];
+    let remaining = line;
+    let key = 0;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    while (remaining.length > 0) {
+      const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+      const italicMatch = remaining.match(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/);
+      const match = boldMatch && italicMatch
+        ? (boldMatch.index! <= italicMatch.index! ? boldMatch : italicMatch)
+        : boldMatch || italicMatch;
 
-    const gl = canvas.getContext("webgl", {
-      alpha: false,
-      depth: false,
-      antialias: false,
-    });
-    if (!gl) return;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = Math.max(window.innerHeight, document.body.scrollHeight);
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      render();
-    };
-
-    const render = () => {
-      const resLocation = gl.getUniformLocation(program!, "uResolution");
-      gl.uniform2f(resLocation, canvas.width, canvas.height);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    };
-
-    const vsSource = `
-      attribute vec4 aVertexPosition;
-      void main() { gl_Position = aVertexPosition; }
-    `;
-    const fsSource = `
-      precision lowp float;
-      uniform vec2 uResolution;
-      float random(vec2 st) {
-        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+      if (!match || match.index === undefined) {
+        parts.push(remaining);
+        break;
       }
-      void main() {
-        vec2 st = gl_FragCoord.xy / uResolution;
-        float n = random(st * 100.0);
-        vec3 baseColor = vec3(242.0/255.0, 236.0/255.0, 224.0/255.0);
-        vec3 finalColor = baseColor - (n * 0.05);
-        gl_FragColor = vec4(finalColor, 1.0);
-      }
-    `;
+      if (match.index > 0) parts.push(remaining.slice(0, match.index));
+      const isBold = match[0].startsWith("**");
+      parts.push(
+        isBold
+          ? <strong key={`${i}-${key++}`} className="font-semibold">{match[1]}</strong>
+          : <em key={`${i}-${key++}`}>{match[1]}</em>
+      );
+      remaining = remaining.slice(match.index + match[0].length);
+    }
 
-    const compileShader = (type: number, source: string) => {
-      const shader = gl.createShader(type);
-      if (!shader) return null;
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      return shader;
-    };
-
-    const program = gl.createProgram();
-    if (!program) return;
-
-    const vs = compileShader(gl.VERTEX_SHADER, vsSource);
-    const fs = compileShader(gl.FRAGMENT_SHADER, fsSource);
-    if (vs) gl.attachShader(program, vs);
-    if (fs) gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    gl.useProgram(program);
-
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-
-    const positionLocation = gl.getAttribLocation(program, "aVertexPosition");
-    gl.enableVertexAttribArray(positionLocation);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-    window.addEventListener("resize", resize);
-    resize();
-
-    return () => window.removeEventListener("resize", resize);
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        zIndex: 0,
-        pointerEvents: "none",
-        opacity: 0.8,
-      }}
-    />
-  );
-};
+    return (
+      <span key={i}>
+        {parts}
+        {i < text.split("\n").length - 1 && <br />}
+      </span>
+    );
+  });
+}
 
 export default function Demo() {
   const [activeTab, setActiveTab] = useState<Category>("culture");
@@ -114,10 +55,31 @@ export default function Demo() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<TastemakerResponse[]>([]);
   const [error, setError] = useState("");
+  const [doneTastemakers, setDoneTastemakers] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+  const [showAll, setShowAll] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const select = params.get("select");
+    if (select) {
+      const ids = select.split(",").filter((id) => tastemakers.some((tm) => tm.id === id));
+      if (ids.length > 0) {
+        setSelectedTastemakers(ids);
+        const firstTm = tastemakers.find((tm) => tm.id === ids[0]);
+        if (firstTm?.category === "climate") setActiveTab("climate");
+      }
+    }
+  }, []);
 
   const filteredTastemakers = useMemo(() => {
-    return tastemakers.filter((tm) => tm.category === activeTab);
-  }, [activeTab]);
+    return tastemakers.filter((tm) => {
+      if (tm.category !== activeTab) return false;
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return tm.name.toLowerCase().includes(q) || tm.domain.toLowerCase().includes(q) || tm.tagline.toLowerCase().includes(q);
+    });
+  }, [activeTab, search]);
 
   const cultureTastemakers = useMemo(() => tastemakers.filter(tm => tm.category === "culture"), []);
   const climateTastemakers = useMemo(() => tastemakers.filter(tm => tm.category === "climate"), []);
@@ -130,357 +92,373 @@ export default function Demo() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedTastemakers.length === 0) {
-      setError("Please select at least one tastemaker");
-      return;
-    }
-    if (!work.trim()) {
-      setError("Please describe your idea");
-      return;
-    }
+    if (selectedTastemakers.length === 0) { setError("Select at least one mind"); return; }
+    if (!work.trim()) { setError("Describe your idea"); return; }
 
     setLoading(true);
     setError("");
     setResults([]);
+    setDoneTastemakers(new Set());
 
     try {
       const response = await fetch("/api/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tastemakerIds: selectedTastemakers,
-          work: work.trim(),
-        }),
+        body: JSON.stringify({ tastemakerIds: selectedTastemakers, work: work.trim(), stream: true }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         setError(data.error || "Something went wrong");
         return;
       }
 
-      setResults(data.results);
-    } catch {
-      setError("Failed to connect to the server");
-    } finally {
-      setLoading(false);
-    }
+      const reader = response.body?.getReader();
+      if (!reader) { setError("Streaming not supported"); return; }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const data = line.replace(/^data: /, "").trim();
+          if (!data || data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.event === "done") {
+              setDoneTastemakers((prev) => new Set([...prev, parsed.id]));
+            } else if (parsed.event === "start") {
+              setResults((prev) => {
+                if (prev.some((r) => r.id === parsed.id)) return prev;
+                return [...prev, { id: parsed.id, name: parsed.name, response: "" }];
+              });
+            } else if (parsed.delta) {
+              setResults((prev) => prev.map((r) => r.id === parsed.id ? { ...r, response: r.response + parsed.delta } : r));
+            } else if (parsed.error) {
+              setResults((prev) => {
+                if (prev.some((r) => r.id === parsed.id)) return prev.map((r) => r.id === parsed.id ? { ...r, error: parsed.error } : r);
+                return [...prev, { id: parsed.id, name: parsed.id, response: "", error: parsed.error }];
+              });
+            }
+          } catch { /* skip */ }
+        }
+      }
+    } catch { setError("Failed to connect"); }
+    finally { setLoading(false); }
   };
 
+  const quickPicks = activeTab === "culture" ? [
+    { label: "The Minimalists", ids: ["rick-rubin", "dieter-rams", "helmut-lang", "kenya-hara"] },
+    { label: "Tech Visionaries", ids: ["steve-jobs", "jony-ive", "john-maeda"] },
+    { label: "The Provocateurs", ids: ["rei-kawakubo", "virgil-abloh", "ai-weiwei", "vivienne-westwood"] },
+    { label: "Film & Mood", ids: ["wong-kar-wai", "sofia-coppola", "spike-jonze", "michel-gondry"] },
+  ] : [
+    { label: "Youth Activists", ids: ["greta-thunberg", "vanessa-nakate", "xiye-bastida"] },
+    { label: "Systems Thinkers", ids: ["kate-raworth", "donella-meadows", "vaclav-smil"] },
+    { label: "Tech Optimists", ids: ["elon-musk-climate", "saul-griffith", "ramez-naam"] },
+  ];
+
+  const examples = activeTab === "culture" ? [
+    "A minimalist landing page for a meditation app — white space, one CTA, no images. Just typography.",
+    "A hip-hop album that fuses trap beats with orchestral arrangements and spoken word poetry.",
+    "A restaurant interior: exposed concrete, hanging Edison bulbs, reclaimed wood tables, open kitchen.",
+    "A fashion line that combines Japanese streetwear silhouettes with traditional West African textiles.",
+  ] : [
+    "A carbon capture startup that turns CO2 into building materials for affordable housing.",
+    "A city-wide program replacing school bus fleets with electric bikes and walking buses.",
+    "A fast fashion brand launching a 'take-back' program where returned clothes become insulation.",
+    "A vertical farm powered by waste heat from data centers, growing food in food deserts.",
+  ];
+
   return (
-    <div className="min-h-screen relative">
-      <TextureCanvas />
+    <div className="min-h-screen bg-[#fafafa] text-[#0a0a0a]">
+      {/* Header */}
+      <header className="flex justify-between items-center px-8 md:px-12 py-6 border-b border-[#0a0a0a]/10">
+        <a href="/" className="hover:opacity-50 transition-opacity">
+          <span className="font-serif text-xl font-bold tracking-tight">TasteAPI.</span>
+        </a>
+        <p className="text-xs uppercase tracking-[0.2em] opacity-40">Demo</p>
+      </header>
 
-      {/* SVG Filters */}
-      <svg style={{ width: 0, height: 0, position: "absolute" }} aria-hidden="true">
-        <defs>
-          <filter id="handdrawn" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
-      </svg>
+      <main className="max-w-4xl mx-auto px-8 md:px-12 py-12 md:py-16">
+        <form onSubmit={handleSubmit} className="space-y-12">
 
-      <div className="relative z-10">
-        {/* Header */}
-        <header className="flex justify-between items-center p-6 border-b-2 border-[#1e1d1b]/20">
-          <a href="/" className="flex items-center gap-3 opacity-70 hover:opacity-100 transition">
-            <svg className="w-8 h-8" viewBox="0 0 50 50" fill="none" stroke="#1e1d1b" strokeWidth="2" strokeLinecap="round">
-              <circle cx="25" cy="25" r="20" />
-              <path d="M 18 22 Q 25 35, 32 22" />
-              <circle cx="18" cy="18" r="2" fill="#1e1d1b" />
-              <circle cx="32" cy="18" r="2" fill="#1e1d1b" />
-            </svg>
+          {/* Category Tabs */}
+          <div className="flex gap-6">
+            <button
+              type="button"
+              onClick={() => { setActiveTab("culture"); setSearch(""); }}
+              className={`text-xs uppercase tracking-[0.2em] font-medium pb-2 transition-all border-b-2 ${
+                activeTab === "culture" ? "border-[#0a0a0a] opacity-100" : "border-transparent opacity-40 hover:opacity-70"
+              }`}
+            >
+              Culture & Design ({cultureTastemakers.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActiveTab("climate"); setSearch(""); }}
+              className={`text-xs uppercase tracking-[0.2em] font-medium pb-2 transition-all border-b-2 ${
+                activeTab === "climate" ? "border-[#0a0a0a] opacity-100" : "border-transparent opacity-40 hover:opacity-70"
+              }`}
+            >
+              Climate & Sustainability ({climateTastemakers.length})
+            </button>
+          </div>
+
+          {/* Quick Picks */}
+          {selectedTastemakers.length === 0 && (
             <div>
-              <span className="text-xl uppercase tracking-wider">TasteAPI</span>
-              <p className="text-sm opacity-60">Access the judgment of history&apos;s greatest minds</p>
-            </div>
-          </a>
-          <span className="text-lg uppercase tracking-wider opacity-60">Demo</span>
-        </header>
-
-        <main className="max-w-4xl mx-auto px-6 py-12">
-          <form onSubmit={handleSubmit} className="space-y-10">
-            {/* Category Tabs */}
-            <div className="flex gap-4 justify-center">
-              <button
-                type="button"
-                onClick={() => setActiveTab("culture")}
-                className={`relative px-6 py-3 text-xl uppercase tracking-wider transition-all handdrawn-btn ${
-                  activeTab === "culture" ? "opacity-100" : "opacity-50 hover:opacity-70"
-                }`}
-              >
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 150 50"
-                  fill="none"
-                  stroke="#1e1d1b"
-                  strokeWidth={activeTab === "culture" ? "2" : "1"}
-                  style={{ filter: "url(#handdrawn)" }}
-                  preserveAspectRatio="none"
-                >
-                  <rect x="3" y="3" width="144" height="44" rx="22" />
-                </svg>
-                <span className="relative z-10 flex items-center gap-2">
-                  Culture & Design
-                  <span className="text-sm opacity-60">({cultureTastemakers.length})</span>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("climate")}
-                className={`relative px-6 py-3 text-xl uppercase tracking-wider transition-all handdrawn-btn ${
-                  activeTab === "climate" ? "opacity-100" : "opacity-50 hover:opacity-70"
-                }`}
-              >
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 200 50"
-                  fill="none"
-                  stroke="#1e1d1b"
-                  strokeWidth={activeTab === "climate" ? "2" : "1"}
-                  style={{ filter: "url(#handdrawn)" }}
-                  preserveAspectRatio="none"
-                >
-                  <rect x="3" y="3" width="194" height="44" rx="22" />
-                </svg>
-                <span className="relative z-10 flex items-center gap-2">
-                  Climate & Sustainability
-                  <span className="text-sm opacity-60">({climateTastemakers.length})</span>
-                </span>
-              </button>
-            </div>
-
-            {/* Tab Description */}
-            <div className="text-center text-xl opacity-60 max-w-2xl mx-auto">
-              {activeTab === "culture" ? (
-                <p>Music producers, architects, fashion icons, filmmakers. Get judgment on creative work and ideas.</p>
-              ) : (
-                <p>Activists, scientists, entrepreneurs, policymakers. Evaluate climate solutions and environmental initiatives.</p>
-              )}
-            </div>
-
-            {/* Selected Count */}
-            <div className="flex items-center justify-between">
-              <p className="text-lg opacity-60">
-                {selectedTastemakers.length > 0
-                  ? `${selectedTastemakers.length} mind${selectedTastemakers.length > 1 ? 's' : ''} selected`
-                  : "Select minds to consult"}
-              </p>
-              {selectedTastemakers.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedTastemakers([])}
-                  className="text-lg opacity-50 hover:opacity-100 transition uppercase tracking-wider"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-
-            {/* Tastemaker Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTastemakers.map((tm) => {
-                const isSelected = selectedTastemakers.includes(tm.id);
-                return (
+              <p className="text-xs uppercase tracking-[0.2em] opacity-40 mb-4">Quick picks</p>
+              <div className="flex flex-wrap gap-2">
+                {quickPicks.map((combo) => (
                   <button
-                    key={tm.id}
+                    key={combo.label}
                     type="button"
-                    onClick={() => toggleTastemaker(tm.id)}
-                    className={`relative text-left p-5 transition-all ${
-                      isSelected ? "opacity-100" : "opacity-60 hover:opacity-80"
-                    }`}
+                    onClick={() => setSelectedTastemakers(combo.ids)}
+                    className="px-4 py-2 text-xs uppercase tracking-[0.15em] border border-[#0a0a0a]/15 hover:border-[#0a0a0a]/40 transition-colors"
                   >
-                    <svg
-                      className="absolute inset-0 w-full h-full"
-                      viewBox="0 0 200 120"
-                      fill="none"
-                      stroke="#1e1d1b"
-                      strokeWidth={isSelected ? "2.5" : "1.5"}
-                      style={{ filter: "url(#handdrawn)" }}
-                      preserveAspectRatio="none"
-                    >
-                      <rect x="3" y="3" width="194" height="114" rx="8" />
-                    </svg>
-                    <div className="relative z-10">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="text-xl uppercase tracking-wide">{tm.name}</h3>
-                          <p className="text-base opacity-50">{tm.domain}</p>
-                        </div>
-                        <div className="relative w-6 h-6 flex-shrink-0">
-                          <svg
-                            className="w-full h-full"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#1e1d1b"
-                            strokeWidth="2"
-                            style={{ filter: "url(#handdrawn)" }}
-                          >
-                            <circle cx="12" cy="12" r="10" />
-                            {isSelected && (
-                              <path d="M 7 12 L 10 15 L 17 8" strokeWidth="2.5" />
-                            )}
-                          </svg>
-                        </div>
-                      </div>
-                      <p className="mt-3 text-lg italic opacity-70">
-                        &ldquo;{tm.tagline}&rdquo;
-                      </p>
+                    {combo.label} ({combo.ids.length})
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Search */}
+          <div className="space-y-3">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, domain, or philosophy..."
+              className="w-full px-0 py-3 bg-transparent text-sm border-b border-[#0a0a0a]/15 outline-none focus:border-[#0a0a0a]/40 transition-colors placeholder:opacity-30"
+            />
+            <div className="flex items-center justify-between">
+              <p className="text-xs opacity-40">
+                {selectedTastemakers.length > 0
+                  ? `${selectedTastemakers.length} selected`
+                  : `${filteredTastemakers.length} available`}
+              </p>
+              <div className="flex gap-4">
+                {filteredTastemakers.length > 0 && (
+                  <button type="button" onClick={() => {
+                    const ids = filteredTastemakers.map((tm) => tm.id);
+                    setSelectedTastemakers((prev) => [...new Set([...prev, ...ids])]);
+                  }} className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                    Select all
+                  </button>
+                )}
+                {selectedTastemakers.length > 0 && (
+                  <button type="button" onClick={() => setSelectedTastemakers([])}
+                    className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Tastemaker Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[#0a0a0a]/10">
+            {(showAll || search.trim() ? filteredTastemakers : filteredTastemakers.slice(0, 6)).map((tm) => {
+              const isSelected = selectedTastemakers.includes(tm.id);
+              return (
+                <button
+                  key={tm.id}
+                  type="button"
+                  onClick={() => toggleTastemaker(tm.id)}
+                  className={`text-left p-5 bg-[#fafafa] transition-all ${
+                    isSelected ? "bg-[#0a0a0a] text-[#fafafa]" : "hover:bg-[#f0f0f0]"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                      <h3 className="text-sm font-medium">{tm.name}</h3>
+                      <p className={`text-xs mt-0.5 ${isSelected ? "opacity-50" : "opacity-40"}`}>{tm.domain}</p>
                     </div>
+                    <div className={`w-4 h-4 rounded-full border flex-shrink-0 mt-0.5 flex items-center justify-center ${
+                      isSelected ? "border-[#fafafa] bg-[#fafafa]" : "border-[#0a0a0a]/20"
+                    }`}>
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-[#0a0a0a]" />}
+                    </div>
+                  </div>
+                  <p className={`text-xs italic leading-relaxed ${isSelected ? "opacity-60" : "opacity-40"}`}>
+                    &ldquo;{tm.tagline}&rdquo;
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Show More */}
+          {!search.trim() && filteredTastemakers.length > 6 && (
+            <button type="button" onClick={() => setShowAll(!showAll)}
+              className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+              {showAll ? "Show fewer" : `Show all ${filteredTastemakers.length}`}
+            </button>
+          )}
+
+          {/* Selected Chips */}
+          {selectedTastemakers.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedTastemakers.map((id) => {
+                const tm = tastemakers.find((t) => t.id === id);
+                if (!tm) return null;
+                return (
+                  <button key={id} type="button" onClick={() => toggleTastemaker(id)}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-[#0a0a0a] text-[#fafafa] hover:opacity-80 transition-opacity">
+                    {tm.name} <span className="opacity-50">&times;</span>
                   </button>
                 );
               })}
             </div>
+          )}
 
-            {/* Work Description */}
-            <div>
-              <label htmlFor="work" className="block text-xl uppercase tracking-wider opacity-70 mb-3">
-                Describe Your Idea
-              </label>
-              <div className="relative">
-                <svg
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  viewBox="0 0 600 200"
-                  fill="none"
-                  stroke="#1e1d1b"
-                  strokeWidth="1.5"
-                  style={{ filter: "url(#handdrawn)" }}
-                  preserveAspectRatio="none"
-                >
-                  <rect x="3" y="3" width="594" height="194" rx="8" />
-                </svg>
-                <textarea
-                  id="work"
-                  rows={6}
-                  value={work}
-                  onChange={(e) => setWork(e.target.value)}
-                  placeholder={activeTab === "culture"
-                    ? "Describe the creative work or idea you want evaluated..."
-                    : "Describe your climate solution or environmental initiative..."
-                  }
-                  className="relative z-10 w-full px-5 py-4 bg-transparent text-xl resize-none outline-none placeholder:opacity-40"
-                />
-              </div>
-              <p className="mt-2 text-base opacity-50">
-                Be specific. The more context, the better the judgment.
+          {/* Examples */}
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] opacity-40 mb-4">Or try an example</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {examples.map((example, i) => (
+                <button key={i} type="button" onClick={() => setWork(example)}
+                  className="text-left p-4 text-sm font-light leading-relaxed border border-[#0a0a0a]/10 hover:border-[#0a0a0a]/30 transition-colors opacity-60 hover:opacity-100">
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Textarea */}
+          <div>
+            <label htmlFor="work" className="block text-xs uppercase tracking-[0.2em] opacity-40 mb-3">
+              Describe your idea
+            </label>
+            <textarea
+              id="work"
+              rows={5}
+              value={work}
+              onChange={(e) => setWork(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  e.currentTarget.closest("form")?.requestSubmit();
+                }
+              }}
+              placeholder={activeTab === "culture"
+                ? "Describe the creative work or idea you want evaluated..."
+                : "Describe your climate solution or environmental initiative..."}
+              className="w-full px-4 py-4 bg-transparent text-sm leading-relaxed border border-[#0a0a0a]/15 outline-none focus:border-[#0a0a0a]/40 transition-colors resize-none placeholder:opacity-30"
+            />
+            <div className="flex justify-between mt-2">
+              <p className="text-xs opacity-30">Be specific for better judgment.</p>
+              <p className="text-xs opacity-30">
+                {work.length > 0 && <>{work.length} chars · </>}&#8984;Enter
               </p>
             </div>
+          </div>
 
-            {/* Error */}
-            {error && (
-              <div className="relative p-4">
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 600 60"
-                  fill="none"
-                  stroke="#8b0000"
-                  strokeWidth="2"
-                  style={{ filter: "url(#handdrawn)" }}
-                  preserveAspectRatio="none"
-                >
-                  <rect x="3" y="3" width="594" height="54" rx="8" />
-                </svg>
-                <p className="relative z-10 text-xl text-center" style={{ color: "#8b0000" }}>
-                  {error}
-                </p>
-              </div>
-            )}
+          {/* Error */}
+          {error && (
+            <p className="text-sm text-red-700 border-l-2 border-red-700 pl-4">{error}</p>
+          )}
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="relative w-full py-4 text-2xl uppercase tracking-wider transition-all handdrawn-btn disabled:opacity-50"
-            >
-              <svg
-                className="absolute inset-0 w-full h-full"
-                viewBox="0 0 600 60"
-                fill="none"
-                stroke="#1e1d1b"
-                strokeWidth="2"
-                style={{ filter: "url(#handdrawn)" }}
-                preserveAspectRatio="none"
-              >
-                <rect x="3" y="3" width="594" height="54" rx="27" />
-              </svg>
-              <span className="relative z-10">
-                {loading ? "Consulting minds..." : "Get Judgment"}
-              </span>
-            </button>
-          </form>
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading || selectedTastemakers.length === 0 || !work.trim()}
+            className="w-full py-4 bg-[#0a0a0a] text-[#fafafa] text-xs uppercase tracking-[0.2em] font-medium hover:opacity-80 transition-opacity disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            {loading
+              ? `Consulting ${selectedTastemakers.length} mind${selectedTastemakers.length > 1 ? "s" : ""}...`
+              : selectedTastemakers.length === 0
+                ? "Select minds first"
+                : `Get judgment from ${selectedTastemakers.length} mind${selectedTastemakers.length > 1 ? "s" : ""}`
+            }
+          </button>
+        </form>
 
-          {/* Results */}
-          {results.length > 0 && (
-            <div className="mt-16 space-y-8">
-              <h2 className="text-3xl uppercase tracking-wider text-center opacity-70">Judgments</h2>
-              {results.map((result) => {
-                const tm = tastemakers.find((t) => t.id === result.id);
-                return (
-                  <div key={result.id} className="relative p-6">
-                    <svg
-                      className="absolute inset-0 w-full h-full"
-                      viewBox="0 0 800 400"
-                      fill="none"
-                      stroke="#1e1d1b"
-                      strokeWidth="2"
-                      style={{ filter: "url(#handdrawn)" }}
-                      preserveAspectRatio="none"
-                    >
-                      <rect x="3" y="3" width="794" height="394" rx="12" />
-                    </svg>
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="relative w-12 h-12">
-                          <svg
-                            className="w-full h-full"
-                            viewBox="0 0 50 50"
-                            fill="none"
-                            stroke="#1e1d1b"
-                            strokeWidth="2"
-                            style={{ filter: "url(#handdrawn)" }}
-                          >
-                            <circle cx="25" cy="25" r="22" />
-                          </svg>
-                          <span className="absolute inset-0 flex items-center justify-center text-xl">
-                            {result.name.charAt(0)}
-                          </span>
-                        </div>
-                        <div>
-                          <h3 className="text-2xl uppercase tracking-wide">{result.name}</h3>
-                          <p className="text-base opacity-50">{tm?.domain}</p>
-                        </div>
-                      </div>
-                      {result.error ? (
-                        <p style={{ color: "#8b0000" }}>{result.error}</p>
-                      ) : (
-                        <div className="text-xl leading-relaxed whitespace-pre-wrap opacity-80">
-                          {result.response}
-                        </div>
+        {/* Results */}
+        {results.length > 0 && (
+          <div className="mt-20 space-y-12" ref={(el) => { if (el && loading) el.scrollIntoView({ behavior: "smooth", block: "start" }); }}>
+            <div className="flex items-center justify-between">
+              <h2 className="font-serif text-3xl font-bold tracking-tight">Judgments.</h2>
+              {!loading && (
+                <button type="button" onClick={() => { setResults([]); setWork(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                  Ask another &rarr;
+                </button>
+              )}
+            </div>
+
+            {results.map((result) => {
+              const tm = tastemakers.find((t) => t.id === result.id);
+              return (
+                <div key={result.id} className="result-card border-t border-[#0a0a0a]/10 pt-8">
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <h3 className="font-serif text-xl font-bold">{result.name}</h3>
+                      <p className="text-xs uppercase tracking-[0.15em] opacity-40 mt-1">{tm?.domain}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {loading && !doneTastemakers.has(result.id) && (
+                        <span className="text-xs uppercase tracking-[0.15em] opacity-40 streaming-cursor">Thinking</span>
+                      )}
+                      {loading && doneTastemakers.has(result.id) && (
+                        <span className="text-xs uppercase tracking-[0.15em] opacity-30">Done</span>
+                      )}
+                      {!loading && result.response && (
+                        <button type="button" onClick={() => {
+                          navigator.clipboard.writeText(`${result.name}:\n\n${result.response}`);
+                          const btn = document.getElementById(`copy-${result.id}`);
+                          if (btn) { btn.textContent = "Copied"; setTimeout(() => { btn.textContent = "Copy"; }, 1500); }
+                        }} id={`copy-${result.id}`}
+                          className="text-xs uppercase tracking-[0.15em] opacity-30 hover:opacity-100 transition-opacity">
+                          Copy
+                        </button>
                       )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </main>
+                  {result.error ? (
+                    <p className="text-sm text-red-700">{result.error}</p>
+                  ) : (
+                    <div className="text-sm leading-relaxed font-light opacity-80 max-w-2xl">
+                      {renderMarkdown(result.response)}
+                      {loading && result.response.length > 0 && (
+                        <span className="inline-block w-0.5 h-4 bg-[#0a0a0a] ml-0.5 align-middle streaming-cursor" />
+                      )}
+                      {loading && result.response.length === 0 && (
+                        <span className="opacity-30 italic">Thinking...</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
-        {/* Footer */}
-        <footer className="px-6 py-8 text-center border-t-2 border-[#1e1d1b]/20 mt-12">
-          <p className="text-base opacity-50 mb-2">
-            Responses represent interpretations, not actual opinions.
-          </p>
-          <p className="text-lg">
-            <a href="/" className="opacity-70 hover:opacity-100 transition">
-              &larr; Back to TasteAPI
-            </a>
-            <span className="opacity-30 mx-3">·</span>
-            <span className="opacity-50">A Radical Intelligence product</span>
-          </p>
-        </footer>
-      </div>
+            {!loading && results.length > 1 && (
+              <div className="pt-4 border-t border-[#0a0a0a]/10">
+                <button type="button" onClick={() => { setResults([]); setWork(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                  Ask another question &rarr;
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="px-8 md:px-12 py-8 border-t border-[#0a0a0a]/10 mt-12">
+        <div className="flex justify-between items-center">
+          <a href="/" className="text-xs opacity-40 hover:opacity-100 transition-opacity">&larr; Back to TasteAPI</a>
+          <p className="text-xs opacity-30">Responses represent interpretations, not actual opinions.</p>
+        </div>
+      </footer>
     </div>
   );
 }

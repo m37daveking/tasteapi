@@ -6,7 +6,7 @@ const anthropic = new Anthropic();
 
 export async function POST(request: NextRequest) {
   try {
-    const { tastemakerIds, work } = await request.json();
+    const { tastemakerIds, work, stream } = await request.json();
 
     if (!tastemakerIds || !Array.isArray(tastemakerIds) || tastemakerIds.length === 0) {
       return NextResponse.json(
@@ -22,6 +22,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Streaming mode: stream all tastemakers in parallel as SSE
+    if (stream) {
+      const encoder = new TextEncoder();
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          const send = (data: object | string) => {
+            const payload = typeof data === "string" ? data : JSON.stringify(data);
+            controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+          };
+
+          // Launch all tastemaker streams in parallel
+          const streamPromises = tastemakerIds.map(async (id: string) => {
+            const tastemaker = getTastemaker(id);
+            if (!tastemaker) {
+              send({ id, error: "Tastemaker not found" });
+              return;
+            }
+
+            send({ id: tastemaker.id, name: tastemaker.name, event: "start" });
+
+            const messageStream = anthropic.messages.stream({
+              model: "claude-sonnet-4-20250514",
+              max_tokens: 1500,
+              system: tastemaker.systemPrompt,
+              messages: [
+                {
+                  role: "user",
+                  content: `Please evaluate this creative work:\n\n${work}`,
+                },
+              ],
+            });
+
+            for await (const event of messageStream) {
+              if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+                send({ id: tastemaker.id, delta: event.delta.text });
+              }
+            }
+
+            send({ id: tastemaker.id, event: "done" });
+          });
+
+          await Promise.all(streamPromises);
+          controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+          controller.close();
+        },
+      });
+
+      return new Response(readableStream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
+    // Non-streaming fallback
     const results = await Promise.all(
       tastemakerIds.map(async (id: string) => {
         const tastemaker = getTastemaker(id);
