@@ -52,20 +52,20 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="flex justify-between items-start px-8 md:px-12 pt-8">
         <div className="font-serif text-2xl font-bold tracking-tight">TasteAPI.</div>
-        <div className="hidden md:flex items-center gap-10 text-xs uppercase tracking-[0.2em] font-medium pt-1">
+        <div className="hidden md:flex items-center gap-10 text-sm uppercase tracking-[0.15em] font-medium pt-1">
           <a href="/demo" className="hover:opacity-50 transition-opacity">Demo</a>
           <a href="#how" className="hover:opacity-50 transition-opacity">How It Works</a>
           <a href="#api" className="hover:opacity-50 transition-opacity">API</a>
           <a href="#join" className="hover:opacity-50 transition-opacity">Early Access</a>
         </div>
-        <div className="text-xs uppercase tracking-[0.15em] text-right leading-relaxed opacity-60 pt-1">
+        <div className="text-sm text-right leading-relaxed opacity-50 pt-1">
           [Early Access 2026]<br />A Radical Intelligence Product
         </div>
       </nav>
 
       {/* Hero */}
       <section className="px-8 md:px-12 pt-24 md:pt-32 pb-20 md:pb-32 min-h-[85vh] flex flex-col justify-center">
-        <p className={`text-xs uppercase tracking-[0.25em] opacity-40 mb-8 transition-opacity duration-700 ${mounted ? "opacity-40" : "opacity-0"}`}>
+        <p className={`text-sm uppercase tracking-[0.2em] opacity-50 mb-8 transition-opacity duration-700 ${mounted ? "opacity-50" : "opacity-0"}`}>
           Taste as a Service / 001
         </p>
 
@@ -74,12 +74,12 @@ export default function LandingPage() {
         </h1>
 
         <div className="mt-16 md:mt-24 ml-auto max-w-lg">
-          <p className={`text-lg md:text-xl leading-relaxed font-light opacity-70 transition-all duration-700 delay-300 ${mounted ? "opacity-70 translate-y-0" : "opacity-0 translate-y-4"}`}>
+          <p className={`text-lg md:text-xl leading-relaxed transition-all duration-700 delay-300 ${mounted ? "opacity-80 translate-y-0" : "opacity-0 translate-y-4"}`}>
             TasteAPI encodes the aesthetic judgment of history&apos;s greatest creative minds into AI-powered APIs. Query Rick Rubin, Brian Eno, Dieter Rams — get judgment, not just answers.
           </p>
           <a
             href="/demo"
-            className={`inline-block mt-8 text-xs uppercase tracking-[0.25em] font-medium border-b border-[#0a0a0a] pb-1 hover:opacity-50 transition-all duration-700 delay-500 ${mounted ? "opacity-100" : "opacity-0"}`}
+            className={`inline-block mt-8 text-sm uppercase tracking-[0.2em] font-medium border-b border-[#0a0a0a] pb-1 hover:opacity-50 transition-all duration-700 delay-500 ${mounted ? "opacity-100" : "opacity-0"}`}
           >
             Try the Demo &rarr;
           </a>
@@ -94,7 +94,7 @@ export default function LandingPage() {
         <div className="flex flex-col md:flex-row gap-16 md:gap-24">
           {/* Left: The question */}
           <div className="flex-1">
-            <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-6">
+            <p className="text-sm uppercase tracking-[0.2em] opacity-50 mb-6">
               {active.name} / {active.domain}
             </p>
             <h2 className="font-serif text-[clamp(2rem,6vw,5.5rem)] font-bold leading-[1.05] tracking-tight transition-all duration-500">
@@ -103,27 +103,27 @@ export default function LandingPage() {
           </div>
 
           {/* Right: Tastemaker list */}
-          <div className="md:w-64 flex flex-col gap-1">
-            <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-4">
+          <div className="md:w-72 flex flex-col gap-1">
+            <p className="text-sm uppercase tracking-[0.2em] opacity-50 mb-4">
               {tastemakers.length} Minds Encoded
             </p>
             {tastemakers.map((tm, i) => (
               <button
                 key={tm.id}
                 onClick={() => handleTastemakerClick(i)}
-                className={`text-left py-2 text-sm transition-all duration-300 border-b border-transparent ${
+                className={`text-left py-2.5 text-base transition-all duration-300 border-b border-transparent ${
                   i === activeIndex
                     ? "opacity-100 font-medium border-[#0a0a0a]/20"
-                    : "opacity-30 hover:opacity-60"
+                    : "opacity-40 hover:opacity-70"
                 }`}
               >
                 <span>{tm.name}</span>
-                <span className="ml-3 text-xs opacity-50">{tm.domain}</span>
+                <span className="ml-3 text-sm opacity-60">{tm.domain}</span>
               </button>
             ))}
             <a
               href="/demo"
-              className="mt-4 text-xs uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity"
+              className="mt-4 text-sm uppercase tracking-[0.15em] opacity-50 hover:opacity-100 transition-opacity"
             >
               Explore all 56 &rarr;
             </a>
@@ -136,24 +136,24 @@ export default function LandingPage() {
 
       {/* See It In Action */}
       <section className="px-8 md:px-12 py-20 md:py-32">
-        <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-6">Same Input / Different Minds</p>
+        <p className="text-sm uppercase tracking-[0.2em] opacity-50 mb-6">Same Input / Different Minds</p>
         <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-16">See it in action.</h2>
 
         <div className="max-w-3xl">
-          <blockquote className="text-lg md:text-xl font-light opacity-60 border-l-2 border-[#0a0a0a]/20 pl-6 mb-16">
+          <blockquote className="text-lg md:text-xl leading-relaxed opacity-70 border-l-2 border-[#0a0a0a]/30 pl-6 mb-16">
             &ldquo;A landing page with 8 features, 12 testimonials, animated hero, and 3 CTAs. Core value prop: reduce meetings by 50%.&rdquo;
           </blockquote>
 
           <div className="grid md:grid-cols-2 gap-12 md:gap-16">
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-4">Rick Rubin / Music</p>
-              <p className="text-base leading-relaxed font-light">
+              <p className="text-sm uppercase tracking-[0.15em] opacity-50 mb-4">Rick Rubin / Music</p>
+              <p className="text-base leading-[1.8]">
                 &ldquo;I&apos;m pulling away. You buried your most compelling truth under layers of decoration. Twelve testimonials is fear talking — you don&apos;t trust the one thing you do. What if you removed everything except the core promise? One sentence. One button. Let the silence do the convincing.&rdquo;
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-4">Brian Eno / Systems</p>
-              <p className="text-base leading-relaxed font-light">
+              <p className="text-sm uppercase tracking-[0.15em] opacity-50 mb-4">Brian Eno / Systems</p>
+              <p className="text-base leading-[1.8]">
                 &ldquo;This isn&apos;t a system — it&apos;s accumulation. You&apos;ve filled the canvas instead of designing the frame. What if the page itself demonstrated the product? Show a meeting dissolving. Let visitors feel 50% fewer meetings in the negative space. Use fewer notes.&rdquo;
               </p>
             </div>
@@ -166,7 +166,7 @@ export default function LandingPage() {
 
       {/* How It Works */}
       <section id="how" className="px-8 md:px-12 py-20 md:py-32">
-        <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-6">Process / 003</p>
+        <p className="text-sm uppercase tracking-[0.2em] opacity-50 mb-6">Process / 003</p>
         <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-16">How it works.</h2>
 
         <div className="grid md:grid-cols-3 gap-12 md:gap-16 max-w-4xl">
@@ -176,9 +176,9 @@ export default function LandingPage() {
             { num: "03", title: "Querying", desc: "Submit any creative work or idea. Get judgment and reasoning in their authentic voice. Multiple perspectives, one API call." },
           ].map((step) => (
             <div key={step.num}>
-              <p className="text-xs uppercase tracking-[0.25em] opacity-30 mb-4">{step.num}</p>
-              <h3 className="font-serif text-xl font-bold mb-3">{step.title}</h3>
-              <p className="text-sm leading-relaxed font-light opacity-60">{step.desc}</p>
+              <p className="text-sm uppercase tracking-[0.15em] opacity-40 mb-4">{step.num}</p>
+              <h3 className="font-serif text-2xl font-bold mb-3">{step.title}</h3>
+              <p className="text-base leading-[1.7] opacity-70">{step.desc}</p>
             </div>
           ))}
         </div>
@@ -189,10 +189,10 @@ export default function LandingPage() {
 
       {/* API Example */}
       <section id="api" className="px-8 md:px-12 py-20 md:py-32">
-        <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-6">Integration / 004</p>
+        <p className="text-sm uppercase tracking-[0.2em] opacity-50 mb-6">Integration / 004</p>
         <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-16">One API call.</h2>
 
-        <div className="max-w-xl bg-[#0a0a0a] text-[#fafafa] rounded-sm p-8 font-mono text-sm leading-relaxed">
+        <div className="max-w-xl bg-[#0a0a0a] text-[#fafafa] rounded-sm p-8 font-mono text-sm leading-[1.8]">
           <pre className="overflow-x-auto whitespace-pre-wrap">
 {`const res = await fetch('/api/query', {
   method: 'POST',
@@ -218,14 +218,14 @@ for await (const chunk of res.body) {
       {/* Join */}
       <section id="join" className="px-8 md:px-12 py-20 md:py-32">
         <div className="max-w-lg">
-          <p className="text-xs uppercase tracking-[0.25em] opacity-40 mb-6">Early Access / 005</p>
+          <p className="text-sm uppercase tracking-[0.2em] opacity-50 mb-6">Early Access / 005</p>
           <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-6">Join the beta.</h2>
-          <p className="text-base font-light opacity-60 mb-10">
+          <p className="text-lg opacity-70 mb-10 leading-relaxed">
             Get early access and founding rates. We&apos;re onboarding teams in batches.
           </p>
 
           {submitted ? (
-            <p className="text-sm font-medium">Thanks — we&apos;ll be in touch.</p>
+            <p className="text-base font-medium">Thanks — we&apos;ll be in touch.</p>
           ) : (
             <form onSubmit={handleSubmit} className="flex gap-4">
               <input
@@ -234,11 +234,11 @@ for await (const chunk of res.body) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 required
-                className="flex-1 px-4 py-3 bg-transparent border border-[#0a0a0a]/20 text-sm outline-none focus:border-[#0a0a0a] transition-colors placeholder:opacity-30"
+                className="flex-1 px-4 py-3 bg-transparent border border-[#0a0a0a]/20 text-base outline-none focus:border-[#0a0a0a] transition-colors placeholder:opacity-40"
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-[#0a0a0a] text-[#fafafa] text-xs uppercase tracking-[0.2em] font-medium hover:opacity-80 transition-opacity"
+                className="px-6 py-3 bg-[#0a0a0a] text-[#fafafa] text-sm uppercase tracking-[0.15em] font-medium hover:opacity-80 transition-opacity"
               >
                 Request Access
               </button>
@@ -252,9 +252,9 @@ for await (const chunk of res.body) {
         <div className="flex flex-col md:flex-row justify-between gap-6">
           <div>
             <div className="font-serif text-lg font-bold">TasteAPI.</div>
-            <p className="text-xs opacity-40 mt-1">A Radical Intelligence product</p>
+            <p className="text-sm opacity-50 mt-1">A Radical Intelligence product</p>
           </div>
-          <div className="text-xs opacity-40 md:text-right leading-relaxed">
+          <div className="text-sm opacity-50 md:text-right leading-relaxed">
             <p>Responses represent interpretations, not actual opinions</p>
             <p>of the individuals referenced.</p>
           </div>

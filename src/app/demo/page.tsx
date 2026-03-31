@@ -183,7 +183,7 @@ export default function Demo() {
         <a href="/" className="hover:opacity-50 transition-opacity">
           <span className="font-serif text-xl font-bold tracking-tight">TasteAPI.</span>
         </a>
-        <p className="text-xs uppercase tracking-[0.2em] opacity-40">Demo</p>
+        <p className="text-sm uppercase tracking-[0.2em] opacity-60">Demo</p>
       </header>
 
       <main className="max-w-4xl mx-auto px-8 md:px-12 py-12 md:py-16">
@@ -194,8 +194,8 @@ export default function Demo() {
             <button
               type="button"
               onClick={() => { setActiveTab("culture"); setSearch(""); }}
-              className={`text-xs uppercase tracking-[0.2em] font-medium pb-2 transition-all border-b-2 ${
-                activeTab === "culture" ? "border-[#0a0a0a] opacity-100" : "border-transparent opacity-40 hover:opacity-70"
+              className={`text-sm uppercase tracking-[0.2em] font-medium pb-2 transition-all border-b-2 ${
+                activeTab === "culture" ? "border-[#0a0a0a] opacity-100" : "border-transparent opacity-60 hover:opacity-70"
               }`}
             >
               Culture & Design ({cultureTastemakers.length})
@@ -203,8 +203,8 @@ export default function Demo() {
             <button
               type="button"
               onClick={() => { setActiveTab("climate"); setSearch(""); }}
-              className={`text-xs uppercase tracking-[0.2em] font-medium pb-2 transition-all border-b-2 ${
-                activeTab === "climate" ? "border-[#0a0a0a] opacity-100" : "border-transparent opacity-40 hover:opacity-70"
+              className={`text-sm uppercase tracking-[0.2em] font-medium pb-2 transition-all border-b-2 ${
+                activeTab === "climate" ? "border-[#0a0a0a] opacity-100" : "border-transparent opacity-60 hover:opacity-70"
               }`}
             >
               Climate & Sustainability ({climateTastemakers.length})
@@ -214,14 +214,14 @@ export default function Demo() {
           {/* Quick Picks */}
           {selectedTastemakers.length === 0 && (
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] opacity-40 mb-4">Quick picks</p>
+              <p className="text-sm uppercase tracking-[0.2em] opacity-60 mb-4">Quick picks</p>
               <div className="flex flex-wrap gap-2">
                 {quickPicks.map((combo) => (
                   <button
                     key={combo.label}
                     type="button"
                     onClick={() => setSelectedTastemakers(combo.ids)}
-                    className="px-4 py-2 text-xs uppercase tracking-[0.15em] border border-[#0a0a0a]/15 hover:border-[#0a0a0a]/40 transition-colors"
+                    className="px-4 py-2 text-sm uppercase tracking-[0.15em] border border-[#0a0a0a]/15 hover:border-[#0a0a0a]/40 transition-colors"
                   >
                     {combo.label} ({combo.ids.length})
                   </button>
@@ -237,10 +237,10 @@ export default function Demo() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, domain, or philosophy..."
-              className="w-full px-0 py-3 bg-transparent text-sm border-b border-[#0a0a0a]/15 outline-none focus:border-[#0a0a0a]/40 transition-colors placeholder:opacity-30"
+              className="w-full px-0 py-3 bg-transparent text-sm border-b border-[#0a0a0a]/15 outline-none focus:border-[#0a0a0a]/40 transition-colors placeholder:opacity-50"
             />
             <div className="flex items-center justify-between">
-              <p className="text-xs opacity-40">
+              <p className="text-sm opacity-60">
                 {selectedTastemakers.length > 0
                   ? `${selectedTastemakers.length} selected`
                   : `${filteredTastemakers.length} available`}
@@ -250,13 +250,13 @@ export default function Demo() {
                   <button type="button" onClick={() => {
                     const ids = filteredTastemakers.map((tm) => tm.id);
                     setSelectedTastemakers((prev) => [...new Set([...prev, ...ids])]);
-                  }} className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                  }} className="text-sm uppercase tracking-[0.15em] opacity-60 hover:opacity-100 transition">
                     Select all
                   </button>
                 )}
                 {selectedTastemakers.length > 0 && (
                   <button type="button" onClick={() => setSelectedTastemakers([])}
-                    className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                    className="text-sm uppercase tracking-[0.15em] opacity-60 hover:opacity-100 transition">
                     Clear
                   </button>
                 )}
@@ -279,8 +279,8 @@ export default function Demo() {
                 >
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div>
-                      <h3 className="text-sm font-medium">{tm.name}</h3>
-                      <p className={`text-xs mt-0.5 ${isSelected ? "opacity-50" : "opacity-40"}`}>{tm.domain}</p>
+                      <h3 className="text-base font-medium">{tm.name}</h3>
+                      <p className={`text-sm mt-0.5 ${isSelected ? "opacity-50" : "opacity-60"}`}>{tm.domain}</p>
                     </div>
                     <div className={`w-4 h-4 rounded-full border flex-shrink-0 mt-0.5 flex items-center justify-center ${
                       isSelected ? "border-[#fafafa] bg-[#fafafa]" : "border-[#0a0a0a]/20"
@@ -288,7 +288,7 @@ export default function Demo() {
                       {isSelected && <div className="w-2 h-2 rounded-full bg-[#0a0a0a]" />}
                     </div>
                   </div>
-                  <p className={`text-xs italic leading-relaxed ${isSelected ? "opacity-60" : "opacity-40"}`}>
+                  <p className={`text-sm italic leading-relaxed ${isSelected ? "opacity-60" : "opacity-60"}`}>
                     &ldquo;{tm.tagline}&rdquo;
                   </p>
                 </button>
@@ -299,7 +299,7 @@ export default function Demo() {
           {/* Show More */}
           {!search.trim() && filteredTastemakers.length > 6 && (
             <button type="button" onClick={() => setShowAll(!showAll)}
-              className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+              className="text-sm uppercase tracking-[0.15em] opacity-60 hover:opacity-100 transition">
               {showAll ? "Show fewer" : `Show all ${filteredTastemakers.length}`}
             </button>
           )}
@@ -312,7 +312,7 @@ export default function Demo() {
                 if (!tm) return null;
                 return (
                   <button key={id} type="button" onClick={() => toggleTastemaker(id)}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-[#0a0a0a] text-[#fafafa] hover:opacity-80 transition-opacity">
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-[#0a0a0a] text-[#fafafa] hover:opacity-80 transition-opacity">
                     {tm.name} <span className="opacity-50">&times;</span>
                   </button>
                 );
@@ -322,11 +322,11 @@ export default function Demo() {
 
           {/* Examples */}
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] opacity-40 mb-4">Or try an example</p>
+            <p className="text-sm uppercase tracking-[0.2em] opacity-60 mb-4">Or try an example</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {examples.map((example, i) => (
                 <button key={i} type="button" onClick={() => setWork(example)}
-                  className="text-left p-4 text-sm font-light leading-relaxed border border-[#0a0a0a]/10 hover:border-[#0a0a0a]/30 transition-colors opacity-60 hover:opacity-100">
+                  className="text-left p-4 text-base leading-relaxed border border-[#0a0a0a]/10 hover:border-[#0a0a0a]/30 transition-colors opacity-70 hover:opacity-100">
                   {example}
                 </button>
               ))}
@@ -335,7 +335,7 @@ export default function Demo() {
 
           {/* Textarea */}
           <div>
-            <label htmlFor="work" className="block text-xs uppercase tracking-[0.2em] opacity-40 mb-3">
+            <label htmlFor="work" className="block text-sm uppercase tracking-[0.2em] opacity-60 mb-3">
               Describe your idea
             </label>
             <textarea
@@ -352,11 +352,11 @@ export default function Demo() {
               placeholder={activeTab === "culture"
                 ? "Describe the creative work or idea you want evaluated..."
                 : "Describe your climate solution or environmental initiative..."}
-              className="w-full px-4 py-4 bg-transparent text-sm leading-relaxed border border-[#0a0a0a]/15 outline-none focus:border-[#0a0a0a]/40 transition-colors resize-none placeholder:opacity-30"
+              className="w-full px-4 py-4 bg-transparent text-base leading-relaxed border border-[#0a0a0a]/15 outline-none focus:border-[#0a0a0a]/40 transition-colors resize-none placeholder:opacity-40"
             />
             <div className="flex justify-between mt-2">
-              <p className="text-xs opacity-30">Be specific for better judgment.</p>
-              <p className="text-xs opacity-30">
+              <p className="text-sm opacity-50">Be specific for better judgment.</p>
+              <p className="text-sm opacity-50">
                 {work.length > 0 && <>{work.length} chars · </>}&#8984;Enter
               </p>
             </div>
@@ -371,7 +371,7 @@ export default function Demo() {
           <button
             type="submit"
             disabled={loading || selectedTastemakers.length === 0 || !work.trim()}
-            className="w-full py-4 bg-[#0a0a0a] text-[#fafafa] text-xs uppercase tracking-[0.2em] font-medium hover:opacity-80 transition-opacity disabled:opacity-20 disabled:cursor-not-allowed"
+            className="w-full py-4 bg-[#0a0a0a] text-[#fafafa] text-sm uppercase tracking-[0.2em] font-medium hover:opacity-80 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {loading
               ? `Consulting ${selectedTastemakers.length} mind${selectedTastemakers.length > 1 ? "s" : ""}...`
@@ -389,7 +389,7 @@ export default function Demo() {
               <h2 className="font-serif text-3xl font-bold tracking-tight">Judgments.</h2>
               {!loading && (
                 <button type="button" onClick={() => { setResults([]); setWork(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                  className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                  className="text-sm uppercase tracking-[0.15em] opacity-60 hover:opacity-100 transition">
                   Ask another &rarr;
                 </button>
               )}
@@ -402,14 +402,14 @@ export default function Demo() {
                   <div className="flex items-start justify-between mb-6">
                     <div>
                       <h3 className="font-serif text-xl font-bold">{result.name}</h3>
-                      <p className="text-xs uppercase tracking-[0.15em] opacity-40 mt-1">{tm?.domain}</p>
+                      <p className="text-sm uppercase tracking-[0.15em] opacity-60 mt-1">{tm?.domain}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       {loading && !doneTastemakers.has(result.id) && (
-                        <span className="text-xs uppercase tracking-[0.15em] opacity-40 streaming-cursor">Thinking</span>
+                        <span className="text-sm uppercase tracking-[0.15em] opacity-60 streaming-cursor">Thinking</span>
                       )}
                       {loading && doneTastemakers.has(result.id) && (
-                        <span className="text-xs uppercase tracking-[0.15em] opacity-30">Done</span>
+                        <span className="text-sm uppercase tracking-[0.15em] opacity-50">Done</span>
                       )}
                       {!loading && result.response && (
                         <button type="button" onClick={() => {
@@ -417,7 +417,7 @@ export default function Demo() {
                           const btn = document.getElementById(`copy-${result.id}`);
                           if (btn) { btn.textContent = "Copied"; setTimeout(() => { btn.textContent = "Copy"; }, 1500); }
                         }} id={`copy-${result.id}`}
-                          className="text-xs uppercase tracking-[0.15em] opacity-30 hover:opacity-100 transition-opacity">
+                          className="text-sm uppercase tracking-[0.15em] opacity-50 hover:opacity-100 transition-opacity">
                           Copy
                         </button>
                       )}
@@ -426,13 +426,13 @@ export default function Demo() {
                   {result.error ? (
                     <p className="text-sm text-red-700">{result.error}</p>
                   ) : (
-                    <div className="text-sm leading-relaxed font-light opacity-80 max-w-2xl">
+                    <div className="text-base leading-[1.8] max-w-2xl">
                       {renderMarkdown(result.response)}
                       {loading && result.response.length > 0 && (
                         <span className="inline-block w-0.5 h-4 bg-[#0a0a0a] ml-0.5 align-middle streaming-cursor" />
                       )}
                       {loading && result.response.length === 0 && (
-                        <span className="opacity-30 italic">Thinking...</span>
+                        <span className="opacity-50 italic">Thinking...</span>
                       )}
                     </div>
                   )}
@@ -443,7 +443,7 @@ export default function Demo() {
             {!loading && results.length > 1 && (
               <div className="pt-4 border-t border-[#0a0a0a]/10">
                 <button type="button" onClick={() => { setResults([]); setWork(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                  className="text-xs uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition">
+                  className="text-sm uppercase tracking-[0.15em] opacity-60 hover:opacity-100 transition">
                   Ask another question &rarr;
                 </button>
               </div>
@@ -455,8 +455,8 @@ export default function Demo() {
       {/* Footer */}
       <footer className="px-8 md:px-12 py-8 border-t border-[#0a0a0a]/10 mt-12">
         <div className="flex justify-between items-center">
-          <a href="/" className="text-xs opacity-40 hover:opacity-100 transition-opacity">&larr; Back to TasteAPI</a>
-          <p className="text-xs opacity-30">Responses represent interpretations, not actual opinions.</p>
+          <a href="/" className="text-sm opacity-60 hover:opacity-100 transition-opacity">&larr; Back to TasteAPI</a>
+          <p className="text-sm opacity-50">Responses represent interpretations, not actual opinions.</p>
         </div>
       </footer>
     </div>
