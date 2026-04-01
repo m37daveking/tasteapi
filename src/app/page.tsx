@@ -62,7 +62,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="px-8 md:px-12 pt-24 md:pt-32 pb-20 md:pb-32 min-h-[85vh] flex flex-col justify-center">
-        <p className={`text-sm uppercase tracking-normal opacity-50 mb-8 transition-opacity duration-700 ${mounted ? "opacity-50" : "opacity-0"}`}>
+        <p className={`text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-8 transition-opacity duration-700 ${mounted ? "opacity-50" : "opacity-0"}`}>
           Taste as a Service
         </p>
 
@@ -76,7 +76,7 @@ export default function LandingPage() {
           </p>
           <a
             href="/demo"
-            className={`inline-block mt-8 text-sm uppercase tracking-normal font-medium border-b border-[#0a0a0a] pb-1 hover:opacity-50 transition-all duration-700 delay-500 ${mounted ? "opacity-100" : "opacity-0"}`}
+            className={`inline-block mt-8 text-[11px] uppercase tracking-[0.12em] font-mono font-medium border-b border-[#0a0a0a] pb-1 hover:opacity-50 transition-all duration-700 delay-500 ${mounted ? "opacity-100" : "opacity-0"}`}
           >
             Try the Demo &rarr;
           </a>
@@ -91,7 +91,7 @@ export default function LandingPage() {
         <div className="flex flex-col md:flex-row gap-16 md:gap-24">
           {/* Left: The question */}
           <div className="flex-1">
-            <p className="text-sm uppercase tracking-normal opacity-50 mb-6">
+            <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-6">
               {active.name} / {active.domain}
             </p>
             <h2 className="font-serif text-[clamp(2rem,6vw,5.5rem)] font-bold leading-[1.05] tracking-tight transition-all duration-500">
@@ -101,7 +101,7 @@ export default function LandingPage() {
 
           {/* Right: Tastemaker list */}
           <div className="md:w-72 flex flex-col gap-1">
-            <p className="text-sm uppercase tracking-normal opacity-50 mb-4">
+            <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-4">
               {tastemakers.length} Minds Encoded
             </p>
             {tastemakers.map((tm, i) => (
@@ -120,7 +120,7 @@ export default function LandingPage() {
             ))}
             <a
               href="/demo"
-              className="mt-4 text-sm uppercase tracking-normal opacity-50 hover:opacity-100 transition-opacity"
+              className="mt-4 text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 hover:opacity-100 transition-opacity"
             >
               Explore all 56 &rarr;
             </a>
@@ -133,7 +133,7 @@ export default function LandingPage() {
 
       {/* See It In Action */}
       <section className="px-8 md:px-12 py-20 md:py-32">
-        <p className="text-sm uppercase tracking-normal opacity-50 mb-6">Same Input / Different Minds</p>
+        <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-6">Same Input / Different Minds</p>
         <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-16">See it in action.</h2>
 
         <div className="max-w-3xl">
@@ -143,13 +143,13 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 gap-12 md:gap-16">
             <div>
-              <p className="text-sm uppercase tracking-normal opacity-50 mb-4">Rick Rubin / Music</p>
+              <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-4">Rick Rubin / Music</p>
               <p className="text-base leading-[1.8]">
                 &ldquo;I&apos;m pulling away. You buried your most compelling truth under layers of decoration. Twelve testimonials is fear talking — you don&apos;t trust the one thing you do. What if you removed everything except the core promise? One sentence. One button. Let the silence do the convincing.&rdquo;
               </p>
             </div>
             <div>
-              <p className="text-sm uppercase tracking-normal opacity-50 mb-4">Brian Eno / Systems</p>
+              <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-4">Brian Eno / Systems</p>
               <p className="text-base leading-[1.8]">
                 &ldquo;This isn&apos;t a system — it&apos;s accumulation. You&apos;ve filled the canvas instead of designing the frame. What if the page itself demonstrated the product? Show a meeting dissolving. Let visitors feel 50% fewer meetings in the negative space. Use fewer notes.&rdquo;
               </p>
@@ -163,7 +163,7 @@ export default function LandingPage() {
 
       {/* How It Works */}
       <section id="how" className="px-8 md:px-12 py-20 md:py-32">
-        <p className="text-sm uppercase tracking-normal opacity-50 mb-6">Process / 003</p>
+        <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-6">Process / 003</p>
         <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-16">How it works.</h2>
 
         <div className="grid md:grid-cols-3 gap-12 md:gap-16 max-w-4xl">
@@ -173,7 +173,7 @@ export default function LandingPage() {
             { num: "03", title: "Querying", desc: "Submit any creative work or idea. Get judgment and reasoning in their authentic voice. Multiple perspectives, one API call." },
           ].map((step) => (
             <div key={step.num}>
-              <p className="text-sm uppercase tracking-normal opacity-40 mb-4">{step.num}</p>
+              <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-40 mb-4">{step.num}</p>
               <h3 className="font-serif text-2xl font-bold mb-3">{step.title}</h3>
               <p className="text-base leading-[1.7] opacity-70">{step.desc}</p>
             </div>
@@ -186,7 +186,7 @@ export default function LandingPage() {
 
       {/* API Example */}
       <section id="api" className="px-8 md:px-12 py-20 md:py-32">
-        <p className="text-sm uppercase tracking-normal opacity-50 mb-6">Integration / 004</p>
+        <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-6">Integration / 004</p>
         <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-16">One API call.</h2>
 
         <div className="max-w-xl bg-[#0a0a0a] text-[#fafafa] rounded-sm p-8 font-mono text-sm leading-[1.8]">
@@ -215,7 +215,7 @@ for await (const chunk of res.body) {
       {/* Join */}
       <section id="join" className="px-8 md:px-12 py-20 md:py-32">
         <div className="max-w-lg">
-          <p className="text-sm uppercase tracking-normal opacity-50 mb-6">Early Access / 005</p>
+          <p className="text-[11px] uppercase tracking-[0.12em] font-mono opacity-50 mb-6">Early Access / 005</p>
           <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight mb-6">Join the beta.</h2>
           <p className="text-lg opacity-70 mb-10 leading-relaxed">
             Get early access and founding rates. We&apos;re onboarding teams in batches.
@@ -235,7 +235,7 @@ for await (const chunk of res.body) {
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-[#0a0a0a] text-[#fafafa] text-sm uppercase tracking-normal font-medium hover:opacity-80 transition-opacity"
+                className="px-6 py-3 bg-[#0a0a0a] text-[#fafafa] text-[11px] uppercase tracking-[0.12em] font-mono font-medium hover:opacity-80 transition-opacity"
               >
                 Request Access
               </button>
