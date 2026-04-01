@@ -181,7 +181,7 @@ export default function Demo() {
       {/* Header */}
       <header className="flex justify-between items-center px-8 md:px-12 py-6 border-b border-[#0a0a0a]/10">
         <a href="/" className="hover:opacity-50 transition-opacity">
-          <span className="font-serif text-xl font-bold tracking-tight">TasteAPI.</span>
+          <img src="/logo.png" alt="TasteAPI" className="h-10" />
         </a>
         <p className="text-sm uppercase tracking-[0.2em] opacity-60">Demo</p>
       </header>
